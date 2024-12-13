@@ -35,6 +35,10 @@ export class Grid<T extends Token> {
     return this.cells[position.z][position.y];
   }
 
+  public is3D() {
+    return this.dimensions.depth > 1;
+  }
+
   public isWithinBounds(position: Point) {
     return (
       position.x >= 0 &&

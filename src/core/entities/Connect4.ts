@@ -8,7 +8,7 @@ import {
   Vector,
 } from '@/core/entities';
 import { IObservable, IObserver } from '@/core/interfaces';
-import { CellEvents } from '@/core/enums';
+import { Axes3D, CellEvents } from '@/core/enums';
 import { Axes2D } from '@/core/enums/Axes2D.ts';
 
 export class Connect4
@@ -118,7 +118,8 @@ export class Connect4
   }
 
   private hasWon(player: Player, cell: Cell<Token>) {
-    const streaks = Object.values(Axes2D).map((axis) => [
+    const axes = this.grid.is3D() ? Axes3D : Axes2D;
+    const streaks = Object.values(axes).map((axis) => [
       cell,
       ...this.getStreakCellsOnAxis(player, cell.position, axis),
     ]);
