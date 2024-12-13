@@ -1,9 +1,9 @@
 <template>
-  <div class="h-min w-min border-2 border-black">
+  <div class="flex size-min flex-col gap-2">
     <div
       v-for="(layer, z) in grid.cells"
       :style="{ 'background-color': PlayerColor.Blue }"
-      class="flex flex-col"
+      class="flex flex-col border-2 border-black"
     >
       <div v-for="(row, y) in layer" class="flex flex-row">
         <div

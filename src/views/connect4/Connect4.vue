@@ -1,5 +1,5 @@
 <template>
-  <div class="flex h-screen items-center justify-center">
+  <div class="flex items-center justify-center">
     <Connect4Grid
       :grid="game.grid as Grid<Token>"
       :streak-cells="streakCells"
@@ -24,7 +24,7 @@ const game = ref(
     dimensions: {
       width: 7,
       height: 6,
-      depth: 1,
+      depth: 4,
     },
     players: [
       { name: 'Player 1', color: PlayerColor.Yellow, score: 0 },
