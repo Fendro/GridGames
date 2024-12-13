@@ -59,6 +59,6 @@ export class Grid<T extends Token> {
           )
           .join('\n'),
       )
-      .join('\n');
+      .join('\n\n');
   }
 }

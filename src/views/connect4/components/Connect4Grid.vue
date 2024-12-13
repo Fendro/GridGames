@@ -26,7 +26,7 @@
 <script lang="ts" setup>
 import { Cell, Grid, Point, Token } from '@/core/entities';
 import Connect4Token from '@/views/connect4/components/Connect4Token.vue';
-import { PlayerColor } from '@/core/enums';
+import { PlayerColor } from '@/core/constants';
 
 export interface Connect4GridEmits {
   (e: 'cell-click', position: Point): void;

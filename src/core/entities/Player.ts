@@ -1,4 +1,4 @@
-import { PlayerColor } from '@/core/enums';
+import { PlayerColor } from '@/core/constants';
 
 export class Player implements Player {
   public constructor(

@@ -3,17 +3,14 @@
     <Connect4Grid
       :grid="game.grid as Grid<Token>"
       :streak-cells="streakCells"
-      @cell-click="
-        (position) =>
-          tryTo(() => game.play(position, new Token(game.currentPlayer)))
-      "
+      @cell-click="handleCellClick"
     />
   </div>
 </template>
 
 <script lang="ts" setup>
-import { Cell, Grid, Token } from '@/core/entities';
-import { CellEvents, PlayerColor } from '@/core/enums';
+import { Cell, Grid, Point, Token } from '@/core/entities';
+import { CellEvents, PlayerColor } from '@/core/constants';
 import { buildConnect4 } from '@/core/usecases';
 import Connect4Grid from '@/views/connect4/components/Connect4Grid.vue';
 import { Ref, ref } from 'vue';
@@ -44,6 +41,15 @@ const tryTo = (func: () => void) => {
   } catch (e: unknown) {
     console.error(e);
   }
+};
+
+const handleCellClick = (position: Point) => {
+  const lowestEmptyCell = game.value.getLowestEmptyCell(position);
+  if (lowestEmptyCell === null) return;
+
+  tryTo(() =>
+    game.value.play(lowestEmptyCell, new Token(game.value.currentPlayer)),
+  );
 };
 </script>
 

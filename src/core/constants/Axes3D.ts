@@ -1,5 +1,5 @@
 import { Vector } from '@/core/entities';
-import { Axes2D } from '@/core/enums/Axes2D.ts';
+import { Axes2D } from '@/core/constants/Axes2D.ts';
 
 const above = new Vector(0, 0, -1);
 const aboveFront = new Vector(0, -1, -1);

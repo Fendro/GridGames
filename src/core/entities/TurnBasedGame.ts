@@ -1,4 +1,4 @@
-import { Grid, Player, Point, Token } from '@/core/entities';
+import { Cell, Grid, Player, Token } from '@/core/entities';
 
 export abstract class TurnBasedGame<T extends Token> {
   protected constructor(
@@ -48,7 +48,7 @@ export abstract class TurnBasedGame<T extends Token> {
     this._players = this._players.filter((p) => p.name !== player.name);
   }
 
-  public abstract play(position: Point, token: T): void;
+  public abstract play(cell: Cell<Token>, token: T): void;
 
   protected nextTurn() {
     this._turn++;
