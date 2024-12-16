@@ -1,4 +1,4 @@
-import { Connect4, Player, Token } from '@/core/entities';
+import { Cell, Connect4, Player, Token, Vector } from '@/core/entities';
 import { PlayerColor } from '@/core/constants';
 
 export class Bot extends Player {
@@ -19,7 +19,11 @@ export class Bot extends Player {
       return;
     }
 
-    const favorableCells = this.getFavorableCells(game);
+    let favorableCells = this.getFavorableCells(game);
+    favorableCells = favorableCells.filter(
+      this.doesNotBenefitAnotherPlayer(game),
+    );
+
     const randomCell =
       favorableCells.length > 0
         ? this.randomValue(favorableCells)
@@ -28,15 +32,44 @@ export class Bot extends Player {
     game.play(randomCell, new Token(this));
   }
 
+  private doesNotBenefitAnotherPlayer(game: Connect4) {
+    return (cell: Cell<Token>) => {
+      let upperNeighbouringCellPositions: Vector[] = [];
+      const direction = new Vector(0, -1, 0);
+      for (let i = 0; i < game.grid.dimensions.depth; i++) {
+        upperNeighbouringCellPositions.push(
+          new Vector(cell.position.x, cell.position.y, i).add(direction),
+        );
+      }
+      upperNeighbouringCellPositions = upperNeighbouringCellPositions.filter(
+        (position) => game.grid.isWithinBounds(position),
+      );
+
+      if (upperNeighbouringCellPositions.length === 0) return true;
+
+      return game.players
+        .filter((player) => player !== this)
+        .every((player) =>
+          upperNeighbouringCellPositions.every(
+            (position) =>
+              !game.isWinningMove(
+                game.grid.getCell(position),
+                new Token(player),
+              ),
+          ),
+        );
+    };
+  }
+
   private getPotentialWinningMoves(game: Connect4) {
     return game.freeLowestCells.filter((cell) =>
-      game.isWinningPlay(cell, new Token(this)),
+      game.isWinningMove(cell, new Token(this)),
     );
   }
 
   private getNextPlayerWinningMoves(game: Connect4) {
     return game.freeLowestCells.filter((cell) =>
-      game.isWinningPlay(cell, new Token(game.nextPlayerTurnLap[0])),
+      game.isWinningMove(cell, new Token(game.nextPlayerTurnLap[0])),
     );
   }
 

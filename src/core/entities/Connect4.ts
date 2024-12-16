@@ -55,7 +55,7 @@ export class Connect4
     ];
   }
 
-  public isWinningPlay(cell: Cell<Token>, token: Token) {
+  public isWinningMove(cell: Cell<Token>, token: Token) {
     return this.getWinningStreaks(cell, token.owner).length > 0;
   }
 
@@ -125,16 +125,17 @@ export class Connect4
     ]);
   }
 
-  protected nextTurn() {
+  protected override nextTurn() {
     super.nextTurn();
     this.updateFreeLowestCells();
 
     if (this._freeLowestCells.length === 0) this._isGameOver = true;
 
-    if (!this._isGameOver && this._currentPlayer instanceof Bot) {
+    const currentPlayer = this._currentPlayer;
+    if (!this._isGameOver && currentPlayer instanceof Bot) {
       setTimeout(() => {
-        if (!this._isGameOver && this._currentPlayer instanceof Bot)
-          this._currentPlayer.play(this);
+        if (!this._isGameOver && currentPlayer === this._currentPlayer)
+          currentPlayer.play(this);
       }, 50);
     }
   }

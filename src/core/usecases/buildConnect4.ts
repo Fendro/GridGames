@@ -1,20 +1,34 @@
 import { Bot, Connect4, Player } from '@/core/entities';
 import { PlayerColor } from '@/core/constants';
 
-export interface Connect4Options {
-  dimensions: Dimensions;
-  players: Player[];
+export type PlayerType = 'player' | 'bot';
+
+export interface PlayerOptions {
+  name: string;
+  color: PlayerColor;
+  score: number;
+  type: PlayerType;
 }
 
-export const buildConnect4 = (options: Connect4Options) => {
-  const players = options.players
-    .slice(0, 0)
-    .map((player) => new Player(player.name, player.color, player.score));
-  players.push(
-    ...Object.values(PlayerColor)
-      .slice(0, 24)
-      .map((color, index) => new Bot(`Bot ${index + 1}`, color, 0)),
-  );
+export interface Connect4Options {
+  dimensions: Dimensions;
+  players: PlayerOptions[];
+}
 
-  return new Connect4(options.dimensions, players, 4);
+const playerConstructor: Record<
+  PlayerType,
+  new (name: string, color: PlayerColor, score: number) => Player
+> = {
+  player: Player,
+  bot: Bot,
+};
+
+export const buildConnect4 = (options: Connect4Options) => {
+  return new Connect4(
+    options.dimensions,
+    options.players.map(
+      (p) => new playerConstructor[p.type](p.name, p.color, p.score),
+    ),
+    4,
+  );
 };
