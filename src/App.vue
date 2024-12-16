@@ -1,5 +1,7 @@
 <template>
-  <Connect4 />
+  <div class="flex min-h-screen items-center justify-center">
+    <Connect4 />
+  </div>
 </template>
 
 <script lang="ts" setup>

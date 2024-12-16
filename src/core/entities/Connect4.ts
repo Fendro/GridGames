@@ -36,7 +36,7 @@ export class Connect4
 
   private _freeLowestCells: Cell<Token>[];
 
-  public get freeLowestCells() {
+  public get freeLowestCells(): ReadonlyArray<Cell<Token>> {
     return this._freeLowestCells;
   }
 
@@ -44,6 +44,15 @@ export class Connect4
 
   public get streakRequirement() {
     return this._streakRequirement;
+  }
+
+  public get nextPlayerTurnLap() {
+    const currentIndex = this._players.indexOf(this._currentPlayer);
+    return [
+      ...this._players.slice(currentIndex + 1),
+      ...this._players.slice(0, currentIndex),
+      this._currentPlayer,
+    ];
   }
 
   public isWinningPlay(cell: Cell<Token>, token: Token) {
@@ -109,6 +118,13 @@ export class Connect4
     this._cellObservers.get(event)?.delete(observer);
   }
 
+  public getStreaks(cell: Cell<Token>, player: Player) {
+    return Object.values(this._grid.is3D() ? Axes3D : Axes2D).map((axis) => [
+      cell,
+      ...this.getStreaksOnAxis(player, cell.position, axis),
+    ]);
+  }
+
   protected nextTurn() {
     super.nextTurn();
     this.updateFreeLowestCells();
@@ -172,13 +188,6 @@ export class Connect4
     return this.getStreaks(cell, player).filter(
       (streak) => streak.length >= this.streakRequirement,
     );
-  }
-
-  private getStreaks(cell: Cell<Token>, player: Player) {
-    return Object.values(this._grid.is3D() ? Axes3D : Axes2D).map((axis) => [
-      cell,
-      ...this.getStreaksOnAxis(player, cell.position, axis),
-    ]);
   }
 
   private getStreaksOnAxis(

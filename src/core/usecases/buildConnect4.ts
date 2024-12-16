@@ -7,9 +7,14 @@ export interface Connect4Options {
 }
 
 export const buildConnect4 = (options: Connect4Options) => {
-  const players = Object.values(PlayerColor)
-    .slice(0, 8)
-    .map((color, index) => new Bot(`Bot ${index + 1}`, color, 0));
+  const players = options.players
+    .slice(0, 0)
+    .map((player) => new Player(player.name, player.color, player.score));
+  players.push(
+    ...Object.values(PlayerColor)
+      .slice(0, 24)
+      .map((color, index) => new Bot(`Bot ${index + 1}`, color, 0)),
+  );
 
   return new Connect4(options.dimensions, players, 4);
 };

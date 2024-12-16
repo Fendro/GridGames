@@ -7,11 +7,46 @@ export class Bot extends Player {
   }
 
   public play(game: Connect4) {
+    const winningCells = this.getPotentialWinningMoves(game);
+    if (winningCells.length > 0) {
+      game.play(this.randomValue(winningCells), new Token(this));
+      return;
+    }
+
+    const nextPlayerWinningCells = this.getNextPlayerWinningMoves(game);
+    if (nextPlayerWinningCells.length > 0) {
+      game.play(this.randomValue(nextPlayerWinningCells), new Token(this));
+      return;
+    }
+
+    const favorableCells = this.getFavorableCells(game);
     const randomCell =
-      game.freeLowestCells[
-        Math.floor(Math.random() * game.freeLowestCells.length)
-      ];
+      favorableCells.length > 0
+        ? this.randomValue(favorableCells)
+        : this.randomValue(game.freeLowestCells);
 
     game.play(randomCell, new Token(this));
+  }
+
+  private getPotentialWinningMoves(game: Connect4) {
+    return game.freeLowestCells.filter((cell) =>
+      game.isWinningPlay(cell, new Token(this)),
+    );
+  }
+
+  private getNextPlayerWinningMoves(game: Connect4) {
+    return game.freeLowestCells.filter((cell) =>
+      game.isWinningPlay(cell, new Token(game.nextPlayerTurnLap[0])),
+    );
+  }
+
+  private getFavorableCells(game: Connect4) {
+    return game.freeLowestCells.filter((cell) =>
+      game.getStreaks(cell, this).some((streak) => streak.length > 1),
+    );
+  }
+
+  private randomValue<T>(array: ReadonlyArray<T>) {
+    return array[Math.floor(Math.random() * array.length)];
   }
 }

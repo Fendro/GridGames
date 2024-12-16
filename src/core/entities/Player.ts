@@ -1,6 +1,6 @@
 import { PlayerColor } from '@/core/constants';
 
-export class Player implements Player {
+export class Player {
   public constructor(
     public name: string,
     public color: PlayerColor,
