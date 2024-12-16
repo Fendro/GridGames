@@ -1,8 +1,6 @@
 import { Bot, Connect4, Player } from '@/core/entities';
 import { PlayerColor } from '@/core/constants';
 
-export type PlayerType = 'player' | 'bot';
-
 export interface PlayerOptions {
   name: string;
   color: PlayerColor;
