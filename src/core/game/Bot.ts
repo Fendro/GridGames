@@ -28,7 +28,7 @@ export class Bot extends Player {
 
   private tryBlockingMove(game: Connect4): boolean {
     const opponentWinningCells = game.solver.getPotentialWinningMoves(
-      game.playersLap[0],
+      game.playersLap[1],
     );
     if (opponentWinningCells.length > 0) {
       game.play(ArrayUtils.randomValue(opponentWinningCells), new Token(this));
