@@ -1,4 +1,5 @@
-import { Point, Token } from '@/core/entities';
+import { Token } from '@/core/board';
+import { Point } from '@/core/geometry';
 
 export class Cell<T extends Token> {
   public constructor(

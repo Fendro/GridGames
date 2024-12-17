@@ -9,11 +9,12 @@
 </template>
 
 <script lang="ts" setup>
-import { Cell, Grid, Point, Token } from '@/core/entities';
-import { CellEvents, PlayerColor } from '@/core/constants';
-import { buildConnect4, PlayerOptions } from '@/core/usecases';
-import Connect4Grid from '@/views/connect4/components/Connect4Grid.vue';
 import { Ref, ref } from 'vue';
+import Connect4Grid from '@/views/connect4/components/Connect4Grid.vue';
+import { buildConnect4, PlayerOptions } from '@/usecases';
+import { Cell, Grid, Token } from '@/core/board';
+import { CellEvents, PlayerColor } from '@/core/constants';
+import { Point } from '@/core/geometry';
 import { IObserver } from '@/core/interfaces';
 
 const game = ref(

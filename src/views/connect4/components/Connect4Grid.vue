@@ -24,9 +24,10 @@
 </template>
 
 <script lang="ts" setup>
-import { Cell, Grid, Point, Token } from '@/core/entities';
 import Connect4Token from '@/views/connect4/components/Connect4Token.vue';
+import { Cell, Grid, Token } from '@/core/board';
 import { PlayerColor } from '@/core/constants';
+import { Point } from '@/core/geometry';
 
 export interface Connect4GridEmits {
   (e: 'cell-click', position: Point): void;

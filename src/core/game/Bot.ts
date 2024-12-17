@@ -1,6 +1,9 @@
-import { Cell, Connect4, Player, Token, Vector } from '@/core/entities';
+import { Cell, Token } from '@/core/board';
+import { Connect4 } from '@/core/connect4';
 import { PlayerColor } from '@/core/constants';
-import { ArrayUtils } from '@/core/utils';
+import { Player } from '@/core/game';
+import { Vector } from '@/core/geometry';
+import { ArrayUtils } from '@/utils';
 
 export class Bot extends Player {
   public constructor(name: string, color: PlayerColor, score: number) {
@@ -25,7 +28,7 @@ export class Bot extends Player {
 
   private tryBlockingMove(game: Connect4): boolean {
     const opponentWinningCells = game.solver.getPotentialWinningMoves(
-      game.nextPlayerTurnLap[0],
+      game.playersLap[0],
     );
     if (opponentWinningCells.length > 0) {
       game.play(ArrayUtils.randomValue(opponentWinningCells), new Token(this));
@@ -43,7 +46,7 @@ export class Bot extends Player {
     const randomCell =
       favorableCells.length > 0
         ? ArrayUtils.randomValue(favorableCells)
-        : ArrayUtils.randomValue(game.freeLowestCells);
+        : ArrayUtils.randomValue(game.playableCells);
 
     game.play(randomCell, new Token(this));
   }
@@ -56,7 +59,7 @@ export class Bot extends Player {
         .filter((player) => player !== this)
         .every((player) =>
           upperCells.every(
-            (upperCell) => !game.solver.isWinningMove(upperCell, player),
+            (upperCell) => !game.solver.isWinningMove(player, upperCell),
           ),
         )
     );

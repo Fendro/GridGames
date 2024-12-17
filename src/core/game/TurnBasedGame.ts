@@ -1,13 +1,14 @@
-import { Cell, Grid, Player, Token } from '@/core/entities';
+import { Cell, Grid, Token } from '@/core/board';
+import { Player } from '@/core/game';
 
 export abstract class TurnBasedGame<T extends Token> {
-  protected constructor(
-    protected _grid: Grid<T>,
-    protected _players: Player[],
-  ) {
-    this._currentPlayer = _players[0];
+  protected constructor(grid: Grid<T>, players: Player[]) {
+    this._currentPlayer = players[0];
+    this._grid = grid;
     this._isGameOver = false;
-    this._playersLap = [..._players];
+    this._playableCells = [];
+    this._players = players;
+    this._playersLap = [...players];
     this._turn = 0;
   }
 
@@ -17,10 +18,28 @@ export abstract class TurnBasedGame<T extends Token> {
     return this._currentPlayer;
   }
 
+  protected _grid: Grid<T>;
+
+  public get grid(): Grid<T> {
+    return this._grid;
+  }
+
   protected _isGameOver: boolean;
 
   public get isGameOver(): boolean {
     return this._isGameOver;
+  }
+
+  protected _playableCells: Cell<Token>[];
+
+  public get playableCells(): ReadonlyArray<Cell<Token>> {
+    return this._playableCells;
+  }
+
+  protected _players: Player[];
+
+  public get players(): ReadonlyArray<Player> {
+    return this._players;
   }
 
   protected _playersLap: Player[];
@@ -33,14 +52,6 @@ export abstract class TurnBasedGame<T extends Token> {
 
   public get turn(): number {
     return this._turn;
-  }
-
-  public get grid(): Grid<T> {
-    return this._grid;
-  }
-
-  public get players(): ReadonlyArray<Player> {
-    return this._players;
   }
 
   public registerPlayer(player: Player): void {
@@ -59,9 +70,16 @@ export abstract class TurnBasedGame<T extends Token> {
 
   protected nextTurn(): void {
     this._turn++;
+    this.updatePlayableCells();
     this.updatePlayersLap();
     this.updateCurrentPlayer();
   }
+
+  protected updateCurrentPlayer(): void {
+    this._currentPlayer = this._playersLap[0];
+  }
+
+  protected abstract updatePlayableCells(): void;
 
   protected updatePlayersLap(): void {
     const currentPlayerIndex = this._players.indexOf(this._currentPlayer);
@@ -71,9 +89,5 @@ export abstract class TurnBasedGame<T extends Token> {
       ...this._players.slice(0, currentPlayerIndex),
       this._currentPlayer,
     ];
-  }
-
-  protected updateCurrentPlayer(): void {
-    this._currentPlayer = this._playersLap[0];
   }
 }

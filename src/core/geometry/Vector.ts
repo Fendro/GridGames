@@ -1,4 +1,4 @@
-import { Point } from '@/core/entities/Point.ts';
+import { Point } from '@/core/geometry/Point.ts';
 
 export class Vector extends Point {
   public constructor(x: number, y: number, z: number) {

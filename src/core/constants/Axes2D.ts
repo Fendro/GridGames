@@ -1,4 +1,4 @@
-import { Vector } from '@/core/entities';
+import { Vector } from '@/core/geometry';
 
 const left = new Vector(-1, 0, 0);
 const right = new Vector(1, 0, 0);

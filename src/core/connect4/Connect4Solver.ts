@@ -1,26 +1,33 @@
-import { Cell, Connect4, Player, Point, Token, Vector } from '@/core/entities';
+import { Cell, Token } from '@/core/board';
+import { Connect4 } from '@/core/connect4';
 import { Axes2D, Axes3D } from '@/core/constants';
+import { ITurnBasedGameSolver, Player } from '@/core/game';
+import { Point, Vector } from '@/core/geometry';
 
-export class Solver {
+export class Connect4Solver implements ITurnBasedGameSolver<Token> {
   private static readonly MINIMUM_STREAK_LENGTH = 1;
 
   public constructor(private readonly _game: Connect4) {}
 
   public getFavorableCells(player: Player): Cell<Token>[] {
-    return this._game.freeLowestCells.filter((cell) =>
-      this.getStreaks(cell, player).some(
-        (streak) => streak.length > Solver.MINIMUM_STREAK_LENGTH,
+    return this._game.playableCells.filter((cell) =>
+      this.getStreaks(player, cell).some(
+        (streak) => streak.length > Connect4Solver.MINIMUM_STREAK_LENGTH,
       ),
     );
   }
 
   public getPotentialWinningMoves(player: Player): Cell<Token>[] {
-    return this._game.freeLowestCells.filter((cell) =>
-      this.isWinningMove(cell, player),
+    return this._game.playableCells.filter((cell) =>
+      this.isWinningMove(player, cell),
     );
   }
 
-  public getStreaks(cell: Cell<Token>, player: Player): Cell<Token>[][] {
+  public isWinningMove(player: Player, cell: Cell<Token>): boolean {
+    return this.getWinningStreaks(player, cell).length > 0;
+  }
+
+  private getStreaks(player: Player, cell: Cell<Token>): Cell<Token>[][] {
     const axes = this.getAxisVectors();
     return axes.map((axis) => [
       cell,
@@ -28,14 +35,13 @@ export class Solver {
     ]);
   }
 
-  public getWinningStreaks(cell: Cell<Token>, player: Player): Cell<Token>[][] {
-    return this.getStreaks(cell, player).filter(
+  private getWinningStreaks(
+    player: Player,
+    cell: Cell<Token>,
+  ): Cell<Token>[][] {
+    return this.getStreaks(player, cell).filter(
       (streak) => streak.length >= this._game.streakRequirement,
     );
-  }
-
-  public isWinningMove(cell: Cell<Token>, player: Player): boolean {
-    return this.getWinningStreaks(cell, player).length > 0;
   }
 
   private getStreaksOnAxis(

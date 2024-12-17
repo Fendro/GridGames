@@ -1,4 +1,4 @@
-import { Vector } from '@/core/entities';
+import { Vector } from '@/core/geometry';
 import { Axes2D } from '@/core/constants/Axes2D.ts';
 
 const above = new Vector(0, 0, -1);

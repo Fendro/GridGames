@@ -1,5 +1,6 @@
-import { Bot, Connect4, Player } from '@/core/entities';
+import { Connect4 } from '@/core/connect4';
 import { PlayerColor } from '@/core/constants';
+import { Bot, Player } from '@/core/game';
 
 export interface PlayerOptions {
   name: string;

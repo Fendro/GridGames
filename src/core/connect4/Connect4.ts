@@ -1,16 +1,9 @@
-import {
-  Bot,
-  Cell,
-  Grid,
-  Player,
-  Point,
-  Solver,
-  Token,
-  TurnBasedGame,
-  Vector,
-} from '@/core/entities';
-import { IObservable, IObserver } from '@/core/interfaces';
+import { Cell, Grid, Token } from '@/core/board';
+import { Connect4Solver } from '@/core/connect4';
 import { CellEvents } from '@/core/constants';
+import { Bot, Player, TurnBasedGame } from '@/core/game';
+import { Point, Vector } from '@/core/geometry';
+import { IObservable, IObserver } from '@/core/interfaces';
 
 export class Connect4
   extends TurnBasedGame<Token>
@@ -18,7 +11,6 @@ export class Connect4
 {
   private _cellObservers: Map<CellEvents, Set<IObserver<Cell<Token>>>> =
     new Map();
-  private readonly _solver: Solver;
 
   public constructor(
     dimensions: Dimensions,
@@ -28,38 +20,23 @@ export class Connect4
     super(new Grid<Token>(dimensions), players);
     this.ensureValidConfiguration(players, streakRequirement, dimensions);
 
-    this._freeLowestCells = [];
-    this.updateFreeLowestCells();
+    this.updatePlayableCells();
+    this._solver = new Connect4Solver(this);
     this._streakRequirement = streakRequirement;
-
-    this._solver = new Solver(this);
 
     if (this._currentPlayer instanceof Bot) this._currentPlayer.play(this);
   }
 
-  public get solver(): Solver {
+  private _solver: Connect4Solver;
+
+  public get solver(): Connect4Solver {
     return this._solver;
-  }
-
-  private _freeLowestCells: Cell<Token>[];
-
-  public get freeLowestCells(): ReadonlyArray<Cell<Token>> {
-    return this._freeLowestCells;
   }
 
   private _streakRequirement: number;
 
   public get streakRequirement(): number {
     return this._streakRequirement;
-  }
-
-  public get nextPlayerTurnLap(): Player[] {
-    const currentIndex = this._players.indexOf(this._currentPlayer);
-    return [
-      ...this._players.slice(currentIndex + 1),
-      ...this._players.slice(0, currentIndex),
-      this._currentPlayer,
-    ];
   }
 
   public play(cell: Cell<Token>, token: Token): void {
@@ -72,18 +49,11 @@ export class Connect4
     cell.value = token;
     this.notify(CellEvents.Occupied, cell);
 
-    const winningStreaks = this._solver.getWinningStreaks(cell, token.owner);
-
-    if (winningStreaks.length > 0) {
-      winningStreaks
-        .flat(1)
-        .forEach((streakCell) => this.notify(CellEvents.Streak, streakCell));
+    if (this._solver.isWinningMove(token.owner, cell)) {
       this._isGameOver = true;
       this._currentPlayer.score++;
 
       console.log(this._currentPlayer, 'won!');
-      console.log('Streak requirement: ', this._streakRequirement);
-      console.log('StreakCells: ', winningStreaks);
       return;
     }
 
@@ -126,9 +96,8 @@ export class Connect4
 
   protected override nextTurn(): void {
     super.nextTurn();
-    this.updateFreeLowestCells();
 
-    if (this._freeLowestCells.length === 0) this._isGameOver = true;
+    if (this._playableCells.length === 0) this._isGameOver = true;
 
     const currentPlayer = this._currentPlayer;
     if (!this._isGameOver && currentPlayer instanceof Bot) {
@@ -145,17 +114,17 @@ export class Connect4
       ?.forEach((observer) => observer.update(subject));
   }
 
-  private updateFreeLowestCells(): void {
-    const freeLowestCells: Cell<Token>[] = [];
+  protected override updatePlayableCells(): void {
+    const playableCells: Cell<Token>[] = [];
 
     for (let z = 0; z < this._grid.dimensions.depth; z++) {
       for (let x = 0; x < this._grid.dimensions.width; x++) {
-        const freeCell = this.getLowestEmptyCell(new Point(x, 0, z));
-        if (freeCell !== null) freeLowestCells.push(freeCell);
+        const cell = this.getLowestEmptyCell(new Point(x, 0, z));
+        if (cell !== null) playableCells.push(cell);
       }
     }
 
-    this._freeLowestCells = freeLowestCells;
+    this._playableCells = playableCells;
   }
 
   private ensureValidConfiguration(
@@ -176,9 +145,9 @@ export class Connect4
       (d) => d >= streakRequirement,
     ).length;
     const is3D = dimensionsValues.every((d) => d > 1);
-    const validDimensionCount = is3D ? 3 : 2;
+    const necessaryCount = is3D ? 3 : 2;
 
-    if (dimensionSatisfyingStreakCount < validDimensionCount)
+    if (dimensionSatisfyingStreakCount < necessaryCount)
       throw new Error(
         'Streak requirement must be less or equal to grid dimensions for 3D grids',
       );

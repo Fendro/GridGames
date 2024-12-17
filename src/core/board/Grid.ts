@@ -1,4 +1,5 @@
-import { Cell, Point, Token } from '@/core/entities';
+import { Cell, Token } from '@/core/board';
+import { Point } from '@/core/geometry';
 
 export class Grid<T extends Token> {
   public readonly cells: Cell<T>[][][];
