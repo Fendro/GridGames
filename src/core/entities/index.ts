@@ -7,3 +7,4 @@ export * from '@/core/entities/Grid';
 export * from '@/core/entities/Player';
 export * from '@/core/entities/Bot';
 export * from '@/core/entities/Token';
+export * from '@/core/entities/Solver';

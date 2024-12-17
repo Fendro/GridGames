@@ -4,13 +4,13 @@ import {
   Grid,
   Player,
   Point,
+  Solver,
   Token,
   TurnBasedGame,
   Vector,
 } from '@/core/entities';
 import { IObservable, IObserver } from '@/core/interfaces';
-import { Axes3D, CellEvents } from '@/core/constants';
-import { Axes2D } from '@/core/constants/Axes2D.ts';
+import { CellEvents } from '@/core/constants';
 
 export class Connect4
   extends TurnBasedGame<Token>
@@ -18,6 +18,7 @@ export class Connect4
 {
   private _cellObservers: Map<CellEvents, Set<IObserver<Cell<Token>>>> =
     new Map();
+  private readonly _solver: Solver;
 
   public constructor(
     dimensions: Dimensions,
@@ -31,7 +32,13 @@ export class Connect4
     this.updateFreeLowestCells();
     this._streakRequirement = streakRequirement;
 
+    this._solver = new Solver(this);
+
     if (this._currentPlayer instanceof Bot) this._currentPlayer.play(this);
+  }
+
+  public get solver(): Solver {
+    return this._solver;
   }
 
   private _freeLowestCells: Cell<Token>[];
@@ -42,11 +49,11 @@ export class Connect4
 
   private _streakRequirement: number;
 
-  public get streakRequirement() {
+  public get streakRequirement(): number {
     return this._streakRequirement;
   }
 
-  public get nextPlayerTurnLap() {
+  public get nextPlayerTurnLap(): Player[] {
     const currentIndex = this._players.indexOf(this._currentPlayer);
     return [
       ...this._players.slice(currentIndex + 1),
@@ -55,11 +62,7 @@ export class Connect4
     ];
   }
 
-  public isWinningMove(cell: Cell<Token>, token: Token) {
-    return this.getWinningStreaks(cell, token.owner).length > 0;
-  }
-
-  public play(cell: Cell<Token>, token: Token) {
+  public play(cell: Cell<Token>, token: Token): void {
     if (this._isGameOver)
       throw new Error('Game is over. Cannot play more moves.');
 
@@ -69,7 +72,7 @@ export class Connect4
     cell.value = token;
     this.notify(CellEvents.Occupied, cell);
 
-    const winningStreaks = this.getWinningStreaks(cell, token.owner);
+    const winningStreaks = this._solver.getWinningStreaks(cell, token.owner);
 
     if (winningStreaks.length > 0) {
       winningStreaks
@@ -87,7 +90,7 @@ export class Connect4
     this.nextTurn();
   }
 
-  public getLowestEmptyCell(position: Point) {
+  public getLowestEmptyCell(position: Point): Cell<Token> | null {
     const lowestCellPosition = new Vector(
       position.x,
       this._grid.dimensions.height - 1,
@@ -107,25 +110,21 @@ export class Connect4
     return null;
   }
 
-  public subscribe(event: CellEvents, observer: IObserver<Cell<Token>>) {
+  public subscribe(event: CellEvents, observer: IObserver<Cell<Token>>): void {
     if (!this._cellObservers.has(event))
       this._cellObservers.set(event, new Set());
 
     this._cellObservers.get(event)!.add(observer);
   }
 
-  public unsubscribe(event: CellEvents, observer: IObserver<Cell<Token>>) {
+  public unsubscribe(
+    event: CellEvents,
+    observer: IObserver<Cell<Token>>,
+  ): void {
     this._cellObservers.get(event)?.delete(observer);
   }
 
-  public getStreaks(cell: Cell<Token>, player: Player) {
-    return Object.values(this._grid.is3D() ? Axes3D : Axes2D).map((axis) => [
-      cell,
-      ...this.getStreaksOnAxis(player, cell.position, axis),
-    ]);
-  }
-
-  protected override nextTurn() {
+  protected override nextTurn(): void {
     super.nextTurn();
     this.updateFreeLowestCells();
 
@@ -140,13 +139,13 @@ export class Connect4
     }
   }
 
-  protected notify(event: CellEvents, subject: Cell<Token>) {
+  protected notify(event: CellEvents, subject: Cell<Token>): void {
     this._cellObservers
       .get(event)
       ?.forEach((observer) => observer.update(subject));
   }
 
-  private updateFreeLowestCells() {
+  private updateFreeLowestCells(): void {
     const freeLowestCells: Cell<Token>[] = [];
 
     for (let z = 0; z < this._grid.dimensions.depth; z++) {
@@ -163,7 +162,7 @@ export class Connect4
     players: Player[],
     streakRequirement: number,
     dimensions: Dimensions,
-  ) {
+  ): void {
     if (players.length < 2) throw new Error('At least 2 players are required');
 
     if (streakRequirement < 2)
@@ -183,46 +182,5 @@ export class Connect4
       throw new Error(
         'Streak requirement must be less or equal to grid dimensions for 3D grids',
       );
-  }
-
-  private getWinningStreaks(cell: Cell<Token>, player: Player) {
-    return this.getStreaks(cell, player).filter(
-      (streak) => streak.length >= this.streakRequirement,
-    );
-  }
-
-  private getStreaksOnAxis(
-    player: Player,
-    position: Point,
-    axis: [Vector, Vector],
-  ) {
-    return axis
-      .map((direction) =>
-        this.getStreakInDirection(player, position, direction),
-      )
-      .flat(1);
-  }
-
-  private getStreakInDirection(
-    player: Player,
-    position: Point,
-    direction: Vector,
-  ) {
-    const streak: Cell<Token>[] = [];
-    const offset = new Vector(position.x, position.y, position.z).add(
-      direction,
-    );
-
-    while (this._grid.isWithinBounds(offset)) {
-      const cell = this._grid.getCell(offset);
-      if (cell.value?.owner === player) {
-        streak.push(cell);
-        offset.add(direction);
-      } else {
-        break;
-      }
-    }
-
-    return streak;
   }
 }

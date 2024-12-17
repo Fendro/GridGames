@@ -13,19 +13,19 @@ export abstract class TurnBasedGame<T extends Token> {
 
   protected _currentPlayer: Player;
 
-  public get currentPlayer() {
+  public get currentPlayer(): Player {
     return this._currentPlayer;
   }
 
   protected _isGameOver: boolean;
 
-  public get isGameOver() {
+  public get isGameOver(): boolean {
     return this._isGameOver;
   }
 
   protected _playersLap: Player[];
 
-  public get playersLap() {
+  public get playersLap(): ReadonlyArray<Player> {
     return this._playersLap;
   }
 
@@ -35,7 +35,7 @@ export abstract class TurnBasedGame<T extends Token> {
     return this._turn;
   }
 
-  public get grid() {
+  public get grid(): Grid<T> {
     return this._grid;
   }
 
@@ -43,7 +43,7 @@ export abstract class TurnBasedGame<T extends Token> {
     return this._players;
   }
 
-  public registerPlayer(player: Player) {
+  public registerPlayer(player: Player): void {
     if (this._players.some((p) => p.name === player.name)) {
       throw new Error(`Player ${player.name} already registered`);
     }
@@ -51,19 +51,19 @@ export abstract class TurnBasedGame<T extends Token> {
     this._players.push(player);
   }
 
-  public unregisterPlayer(player: Player) {
+  public unregisterPlayer(player: Player): void {
     this._players = this._players.filter((p) => p.name !== player.name);
   }
 
   public abstract play(cell: Cell<Token>, token: T): void;
 
-  protected nextTurn() {
+  protected nextTurn(): void {
     this._turn++;
     this.updatePlayersLap();
     this.updateCurrentPlayer();
   }
 
-  protected updatePlayersLap() {
+  protected updatePlayersLap(): void {
     const currentPlayerIndex = this._players.indexOf(this._currentPlayer);
 
     this._playersLap = [
@@ -73,7 +73,7 @@ export abstract class TurnBasedGame<T extends Token> {
     ];
   }
 
-  protected updateCurrentPlayer() {
+  protected updateCurrentPlayer(): void {
     this._currentPlayer = this._playersLap[0];
   }
 }
