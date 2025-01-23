@@ -19,12 +19,19 @@ export class Connect4Solver implements ITurnBasedGameSolver<Token> {
 
   public getPotentialWinningMoves(player: Player): Cell<Token>[] {
     return this._game.playableCells.filter((cell) =>
-      this.isWinningMove(player, cell),
+      this.isWinningMove(player, cell, null),
     );
   }
 
-  public isWinningMove(player: Player, cell: Cell<Token>): boolean {
-    return this.getWinningStreaks(player, cell).length > 0;
+  public isWinningMove(
+    player: Player,
+    cell: Cell<Token>,
+    cb: ((c: Cell<Token>) => void) | null,
+  ): boolean {
+    const winningStreaks = this.getWinningStreaks(player, cell);
+    if (cb) winningStreaks.flat().forEach(cb);
+
+    return winningStreaks.length > 0;
   }
 
   private getStreaks(player: Player, cell: Cell<Token>): Cell<Token>[][] {

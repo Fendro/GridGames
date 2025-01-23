@@ -6,5 +6,10 @@ export interface ITurnBasedGameSolver<T extends Token> {
 
   getPotentialWinningMoves(player: Player): Cell<T>[];
 
-  isWinningMove(player: Player, cell: Cell<T>): boolean;
+  // TODO: Remove the callback argument and find a better implementation to propagate events
+  isWinningMove(
+    player: Player,
+    cell: Cell<T>,
+    cb: ((c: Cell<T>) => void) | null,
+  ): boolean;
 }

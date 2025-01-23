@@ -59,7 +59,7 @@ export class Bot extends Player {
         .filter((player) => player !== this)
         .every((player) =>
           upperCells.every(
-            (upperCell) => !game.solver.isWinningMove(player, upperCell),
+            (upperCell) => !game.solver.isWinningMove(player, upperCell, null),
           ),
         )
     );

@@ -11,7 +11,7 @@
 <script lang="ts" setup>
 import { Ref, ref } from 'vue';
 import Connect4Grid from '@/views/connect4/components/Connect4Grid.vue';
-import { buildConnect4, PlayerOptions } from '@/usecases';
+import { buildConnect4 } from '@/usecases';
 import { Cell, Grid, Token } from '@/core/board';
 import { CellEvents, PlayerColor } from '@/core/constants';
 import { Point } from '@/core/geometry';
@@ -22,20 +22,21 @@ const game = ref(
     dimensions: {
       width: 7,
       height: 6,
-      depth: 4,
+      depth: 1,
     },
     players: [
-      // { name: 'Player 1', color: PlayerColor.Wheat, score: 0, type: 'player' },
-      ...Object.values(PlayerColor)
-        .slice(0, 8)
-        .map(
-          (color, index): PlayerOptions => ({
-            name: `Bot ${index + 1}`,
-            color,
-            score: 0,
-            type: 'bot',
-          }),
-        ),
+      { name: 'Player 1', color: PlayerColor.Yellow, score: 0, type: 'player' },
+      { name: 'Player 2', color: PlayerColor.Red, score: 0, type: 'bot' },
+      // ...Object.values(PlayerColor)
+      //   .slice(0, 4)
+      //   .map(
+      //     (color, index): PlayerOptions => ({
+      //       name: `Bot ${index + 1}`,
+      //       color,
+      //       score: 0,
+      //       type: 'bot',
+      //     }),
+      //   ),
     ],
   }),
 );

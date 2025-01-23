@@ -1,7 +1,7 @@
 import { Cell, Grid, Token } from '@/core/board';
 import { Connect4Solver } from '@/core/connect4';
 import { CellEvents } from '@/core/constants';
-import { Bot, Player, TurnBasedGame } from '@/core/game';
+import { Bot, ITurnBasedGameSolver, Player, TurnBasedGame } from '@/core/game';
 import { Point, Vector } from '@/core/geometry';
 import { IObservable, IObserver } from '@/core/interfaces';
 
@@ -20,16 +20,16 @@ export class Connect4
     super(new Grid<Token>(dimensions), players);
     this.ensureValidConfiguration(players, streakRequirement, dimensions);
 
-    this.updatePlayableCells();
     this._solver = new Connect4Solver(this);
     this._streakRequirement = streakRequirement;
 
+    this.updatePlayableCells();
     if (this._currentPlayer instanceof Bot) this._currentPlayer.play(this);
   }
 
-  private _solver: Connect4Solver;
+  private _solver: ITurnBasedGameSolver<Token>;
 
-  public get solver(): Connect4Solver {
+  public get solver(): ITurnBasedGameSolver<Token> {
     return this._solver;
   }
 
@@ -49,7 +49,11 @@ export class Connect4
     cell.value = token;
     this.notify(CellEvents.Occupied, cell);
 
-    if (this._solver.isWinningMove(token.owner, cell)) {
+    if (
+      this._solver.isWinningMove(token.owner, cell, (c) =>
+        this.notify(CellEvents.Streak, c),
+      )
+    ) {
       this._isGameOver = true;
       this._currentPlayer.score++;
 
@@ -104,7 +108,7 @@ export class Connect4
       setTimeout(() => {
         if (!this._isGameOver && currentPlayer === this._currentPlayer)
           currentPlayer.play(this);
-      }, 50);
+      }, 100);
     }
   }
 
